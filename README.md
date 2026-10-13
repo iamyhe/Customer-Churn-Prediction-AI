@@ -26,7 +26,7 @@
 
 | Dark Mode (Cyberpunk / Neon) | Light Mode (Professional) |
 |:---:|:---:|
-| ![Dark Mode](assets/dark_mode.png) | ![Light Mode](assets/light_mode.png) |
+| ![Dark Mode](dark_mode.png) | ![Light Mode](light_mode.png) |
 
 > *Toggle between themes with a single click in the sidebar.*
 
