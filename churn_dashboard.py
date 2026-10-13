@@ -837,37 +837,42 @@ st.markdown("")
 st.markdown('<p class="section-header">Top At-Risk Customers</p>',
             unsafe_allow_html=True)
 
-# Build the display table
+# Build the display table — filter by the SAME risk_threshold used for KPIs
 top_risk = (
-    filtered_df[filtered_df["Churn_Prediction"] == "At-Risk"]
-    .nlargest(25, "Churn_Probability")[
+    filtered_df[filtered_df["Churn_Probability"] >= risk_threshold]
+    .sort_values("Churn_Probability", ascending=False)
+    .head(25)[
         ["customerID", "Contract", "InternetService", "tenure",
          "MonthlyCharges", "TotalCharges", "Churn_Probability"]
     ]
     .reset_index(drop=True)
 )
-top_risk.columns = [
-    "Customer ID", "Contract", "Internet Service", "Tenure (mo)",
-    "Monthly ($)", "Total ($)", "Churn Prob (%)",
-]
 
-# Ensure numeric types so Pandas .style.format() can apply float formatters
-for num_col in ["Monthly ($)", "Total ($)", "Churn Prob (%)", "Tenure (mo)"]:
-    top_risk[num_col] = pd.to_numeric(top_risk[num_col], errors="coerce").fillna(0)
+if top_risk.empty:
+    st.info("No customers exceed the selected risk threshold for the current filter selection.")
+else:
+    top_risk.columns = [
+        "Customer ID", "Contract", "Internet Service", "Tenure (mo)",
+        "Monthly ($)", "Total ($)", "Churn Prob (%)",
+    ]
 
-top_risk.index = top_risk.index + 1  # 1-based rank
+    # Ensure numeric types so Pandas .style.format() can apply float formatters
+    for num_col in ["Monthly ($)", "Total ($)", "Churn Prob (%)", "Tenure (mo)"]:
+        top_risk[num_col] = pd.to_numeric(top_risk[num_col], errors="coerce").fillna(0)
 
-st.dataframe(
-    top_risk.style
-        .format({
-            "Monthly ($)": "${:,.2f}",
-            "Total ($)": "${:,.2f}",
-            "Churn Prob (%)": "{:.1f}%",
-        })
-        .background_gradient(subset=["Churn Prob (%)"], cmap="RdPu", vmin=50, vmax=100),
-    use_container_width=True,
-    height=460,
-)
+    top_risk.index = top_risk.index + 1  # 1-based rank
+
+    st.dataframe(
+        top_risk.style
+            .format({
+                "Monthly ($)": "${:,.2f}",
+                "Total ($)": "${:,.2f}",
+                "Churn Prob (%)": "{:.1f}%",
+            })
+            .background_gradient(subset=["Churn Prob (%)"], cmap="RdPu", vmin=50, vmax=100),
+        use_container_width=True,
+        height=460,
+    )
 
 st.markdown("")
 
